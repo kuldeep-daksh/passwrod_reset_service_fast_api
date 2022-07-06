@@ -1,29 +1,23 @@
 import ldap
+
 address = "80.0.0.108"
-LDAP_BASE_DN = 'CN=Users,DC=tcplcoe,DC=com'
-user_dn= 'CN=Administrator,CN=Users,DC=tcplcoe,DC=com'
-old_password = "P@ssword@123"
-new_password = "kuldeep123"
-user_dn= "test3@asahiindia.com"
+LDAP_BASE_DN = 'CN=Users,DC=asahiindia,DC=com'
+user_dn = 'CN=Tarun Gupta,OU=Delhi AISGlass,OU=AIS Users,DC=asahiindia,DC=com'
 
-def changePassword(user_dn, old_password, new_password):
-	ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-	l = conn = ldap.initialize('ldap://' + address)
-	l.set_option(ldap.OPT_REFERRALS,0)
-	l.set_option(ldap.OPT_PROTOCOL_VERSION,3)
-	l.set_option(ldap.OPT_X_TLS,ldap.OPT_X_TLS_DEMAND)
-	l.set_option(ldap.OPT_X_TLS_DEMAND,True)
-	l.set_option(ldap.OPT_DEBUG_LEVEL,255)
-	l.simple_bind_s("test3@asahiindia.com", old_password)
+new_password = "9050774794Kul!@1234"
 
-	# Reset Password
-	unicode_pass = str('\"' + str(new_password) + '\"', 'iso-8859-1')
-	password_value = unicode_pass.encode('utf-16-le')
-	add_pass = [(ldap.MOD_REPLACE, 'unicodePwd', [password_value])]
+user = "test2@asahiindia.com"
+password = "P@ssword@123"
+# import class and constants
+enc_pwd = '"{}"'.format(new_password).encode('utf-16-le')
+from ldap3 import Server, Connection, ALL, MODIFY_REPLACE, SUBTREE
 
-	l.modify_s(user_dn,add_pass)
-
-	# Its nice to the server to disconnect and free resources when done
-	l.unbind_s()
-
-y  = changePassword(user_dn, old_password,new_password)
+server = Server(address, get_info=ALL)
+print(server)
+connection = Connection(server, user, password, auto_bind=True)
+connection.search("CN=Tarun Gupta,OU=Delhi AISGlass,OU=AIS Users,DC=asahiindia,DC=com", '(objectclass=*)',
+                  search_scope=SUBTREE, attributes=['*'])
+print(connection.entries)
+changes = {'unicodePwd': [(MODIFY_REPLACE, [enc_pwd])]}
+y = connection.extend.microsoft.modify_password("CN=test 2,DC=asahiindia,DC=com", new_password)
+print(y)
